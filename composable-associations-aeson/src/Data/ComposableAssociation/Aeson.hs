@@ -134,9 +134,9 @@ instance (FromJSON base, FromJSON obj, KnownSymbol key) => FromJSON (base :<> As
 -- If you try encoding with a "base" value that is itself not encoded to a JSON object you'll get a runtime exception.
 --
 -- >>> encode $ True :<> (asValue [1,2,3] :: Association "this-ends-poorly" [Int])
--- *** Exception: NoObjectRepException (Bool True)
+-- *** Exception: JsonObjectEncodingException (Bool True)
 -- >>> encode $ [1,2,3] :<> (asValue "will not work" :: Association "still" String)
--- *** Exception: NoObjectRepException (Array [Number 1.0,Number 2.0,Number 3.0])
+-- *** Exception: JsonObjectEncodingException (Array [Number 1.0,Number 2.0,Number 3.0])
 --
 -- Note:
 -- You'll need @DataKinds@ for this library.
