@@ -138,10 +138,11 @@ instance (FromJSON base, FromJSON obj, KnownSymbol key) => FromJSON (base :<> As
 -- >>> encode $ [1,2,3] :<> (asValue "will not work" :: Association "still" String)
 -- *** Exception: JsonObjectEncodingException (Array [Number 1.0,Number 2.0,Number 3.0])
 --
--- Note:
--- You'll need @DataKinds@ for this library.
--- You'll probably want @TypeOperators@ as well.
--- You can avoid
+-- GHC Extension Note:
+-- You'll need @DataKinds@ for this library (type level literals, no getting around this).
+-- You'll probably want @TypeOperators@ as well (although you can use @WithAssociation@ instead of @:<>@ to avoid this).
+-- You can avoid @PolyKinds@ if you use @asValue True :: Association "key" Bool@ or type inference instead of
+-- @Association (Proxy :: Proxy "key") True@.
 
 
 
