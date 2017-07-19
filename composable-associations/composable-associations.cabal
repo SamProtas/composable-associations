@@ -1,0 +1,35 @@
+name:                composable-associations
+version:             0.1.0.0
+-- synopsis:
+-- description:
+homepage:            https://github.com/SamProtas/composable-associations#readme
+license:             BSD3
+license-file:        LICENSE
+author:              Author name here
+maintainer:          example@example.com
+copyright:           2017 Author name here
+category:            Web
+build-type:          Simple
+extra-source-files:  README.md
+cabal-version:       >=1.10
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     Data.ComposableAssociation
+  build-depends:       base >= 4.7 && < 5
+  default-language:    Haskell2010
+
+test-suite tests
+  default-language: Haskell2010
+  type: exitcode-stdio-1.0
+  hs-source-dirs: test
+  main-is: Main.hs
+  build-depends: base >= 4.7 && < 5
+               , composable-associations
+               , lens
+               , tasty
+               , tasty-hunit
+
+source-repository head
+  type:     git
+  location: https://github.com/SamProtas/composable-associations

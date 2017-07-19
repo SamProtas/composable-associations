@@ -1,0 +1,41 @@
+name:                composable-associations-aeson
+version:             0.1.0.0
+-- synopsis:
+-- description:
+homepage:            https://github.com/SamProtas/composable-associations#readme
+license:             BSD3
+license-file:        LICENSE
+author:              Sam Protas
+maintainer:          sam.protas@gmail.com
+copyright:           2017 Sam Protas
+category:            Web
+build-type:          Simple
+extra-source-files:  README.md
+cabal-version:       >=1.10
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     Data.ComposableAssociation.Aeson
+  build-depends:       base >= 4.7 && < 5
+                     , composable-associations
+                     , text
+                     , unordered-containers
+                     , aeson
+  default-language:    Haskell2010
+
+test-suite tests
+  default-language: Haskell2010
+  type: exitcode-stdio-1.0
+  hs-source-dirs: test
+  main-is: Main.hs
+  build-depends: base >= 4.7 && < 5
+               , aeson
+               , composable-associations-aeson
+               , tasty
+               , tasty-quickcheck
+               , tasty-hunit
+               , bytestring
+
+source-repository head
+  type:     git
+  location: https://github.com/SamProtas/composable-associations-aeson
