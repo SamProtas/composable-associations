@@ -29,23 +29,6 @@ import qualified Data.HashMap.Lazy as HashMap
 
 import Data.ComposableAssociation
 
---      -- * Re-Exported Types
---      Association (..)
---    , (:<>) (..)
---    , WithAssociation
---
---    -- * Re-Exported Helpers
---    , withAssociation
---    , asValue
---    , reKey
---
---    -- * Re-Exported Lens
---    , _value
---    , _keyValue
---    , _base
---
---
---
 
 -- | More specific version of @ObjectEncodingException@ to only Aeson encoding issues.
 newtype JsonObjectEncodingException = JsonObjectEncodingException Value deriving (Show, Typeable)

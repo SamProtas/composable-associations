@@ -1,4 +1,4 @@
-# composable-associations-json
+# composable-associations-aeson
 
 This package re-exports `composable-associations` and implements serialization/deserialization for JSON (via Aeson). 
 
