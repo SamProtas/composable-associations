@@ -1,13 +1,15 @@
 name:                composable-associations-aeson
 version:             0.1.0.0
--- synopsis:
--- description:
+synopsis:            Aeson ToJSON/FromJSON implementation for the types of composable-associations
+description:
+    This library provides the orphan instances implementation JSON serialization for the types in
+    composiable-associations, as well as any other Aeson-specific implementation details.
 homepage:            https://github.com/SamProtas/composable-associations#readme
 license:             BSD3
 license-file:        LICENSE
 author:              Sam Protas
 maintainer:          sam.protas@gmail.com
-copyright:           2017 Sam Protas
+copyright:           2017 Samuel Protas
 category:            Web
 build-type:          Simple
 extra-source-files:  README.md
