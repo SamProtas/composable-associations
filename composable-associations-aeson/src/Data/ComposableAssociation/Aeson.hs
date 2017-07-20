@@ -25,6 +25,7 @@ import Control.Exception
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Aeson
+import Data.Aeson.Types
 import qualified Data.HashMap.Lazy as HashMap
 
 import Data.ComposableAssociation
@@ -45,9 +46,13 @@ instance (ToJSON obj, KnownSymbol key) => ToJSON (Association key obj) where
     where keyName = T.pack $ symbolVal key
 
 instance (FromJSON obj, KnownSymbol key) => FromJSON (Association key obj) where
-  parseJSON = withObject "Association" $ \v -> Association proxy <$> (v .: key >>= parseJSON)
-    where proxy = Proxy :: Proxy key
-          key = T.pack $ symbolVal proxy :: Text
+  parseJSON (Object v) = Association proxy <$> (v .:? key .!= Null >>= parseJSON)
+      where proxy = Proxy :: Proxy key
+            key = T.pack $ symbolVal proxy :: Text
+  parseJSON Null = Association proxy <$> parseJSON Null
+      where proxy = Proxy :: Proxy key
+  parseJSON a = typeMismatch "Association" a
+
 
 -- | Throws a @JsonObjectEncodingException@ if the base value isn't encoded as a JSON object
 instance (ToJSON base, ToJSON obj, KnownSymbol key) => ToJSON (base :<> Association key obj) where
@@ -60,7 +65,7 @@ instance (ToJSON base, ToJSON obj, KnownSymbol key) => ToJSON (base :<> Associat
 instance (FromJSON base, FromJSON obj, KnownSymbol key) => FromJSON (base :<> Association key obj) where
   parseJSON = withObject "base :<> assoc" $ \v' -> (:<>) <$>
                                             parseJSON (Object $ HashMap.delete key v') <*>
-                                            fmap (Association proxy) (v' .: key >>= parseJSON)
+                                            fmap (Association proxy) (v' .:? key .!= Null >>= parseJSON)
     where proxy = Proxy :: Proxy key
           key = T.pack $ symbolVal proxy
 
