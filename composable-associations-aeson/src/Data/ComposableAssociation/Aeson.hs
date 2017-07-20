@@ -46,12 +46,9 @@ instance (ToJSON obj, KnownSymbol key) => ToJSON (Association key obj) where
     where keyName = T.pack $ symbolVal key
 
 instance (FromJSON obj, KnownSymbol key) => FromJSON (Association key obj) where
-  parseJSON (Object v) = Association proxy <$> (v .:? key .!= Null >>= parseJSON)
+  parseJSON = withObject "Association" $ \v' -> Association proxy <$> (v' .:? key .!= Null >>= parseJSON)
       where proxy = Proxy :: Proxy key
-            key = T.pack $ symbolVal proxy :: Text
-  parseJSON Null = Association proxy <$> parseJSON Null
-      where proxy = Proxy :: Proxy key
-  parseJSON a = typeMismatch "Association" a
+            key = T.pack $ symbolVal proxy
 
 
 -- | Throws a @JsonObjectEncodingException@ if the base value isn't encoded as a JSON object

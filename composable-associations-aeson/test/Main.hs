@@ -55,8 +55,17 @@ unitTests = testGroup "Unit Tests"
       res <- try (evaluate $ encode ([1 :: Int] :<> testUser1FriendsAssoc)) :: IO (Either JsonObjectEncodingException ByteString)
       assertBool "Non-Json-Obj base throws JsonObjectEncodingException" (isLeft res)
   , testCase ":<> Invalid Encoding2" $ do
-        res <- try (evaluate $ encode ([1 :: Int] :<> testUser1FriendsAssoc)) :: IO (Either ObjectEncodingException ByteString)
-        assertBool "Non-Json-Obj base throws ObjectEncodingException" (isLeft res) ]
+      res <- try (evaluate $ encode ([1 :: Int] :<> testUser1FriendsAssoc)) :: IO (Either ObjectEncodingException ByteString)
+      assertBool "Non-Json-Obj base throws ObjectEncodingException" (isLeft res)
+  , testCase "Encode Association Null" $ encode testMissingMessages @?= "{\"message_ids\":null}"
+  , testCase "Decode Association Null" $ decode "{\"message_ids\":null}" @?= Just testMissingMessages
+  , testCase "Decode Association Missing Key" $ decode "{}" @?= Just testMissingMessages
+  , testCase "Encode :<> Missing Association" $
+      encode (testUser1 :<> testMissingMessages) @?= "{\"message_ids\":null,\"userId\":1,\"name\":\"Sam\"}"
+  , testCase "Decode :<> Missing Association" $
+      decode "{\"message_ids\":null,\"userId\":1,\"name\":\"Sam\"}" @?= Just (testUser1 :<> testMissingMessages)
+  , testCase "Decode :<> Missing Association Key" $
+      decode "{\"userId\":1,\"name\":\"Sam\"}" @?= Just (testUser1 :<> testMissingMessages)]
 
 
 -- Test Data:
@@ -75,6 +84,10 @@ testUser1FriendsAssoc = Association Proxy [1, 2, 3]
 
 testAssoc :: TestUser :<> Association "message_ids" [Int] :<> Association "results" [Bool]
 testAssoc = testUser1 :<> testUser1FriendsAssoc :<> Association Proxy [True, False, True]
+
+testMissingMessages :: Association "message_ids" (Maybe [Int])
+testMissingMessages = asValue Nothing
+
 
 instance Arbitrary TestUser where
   arbitrary = TestUser <$> arbitrary <*> arbitrary
