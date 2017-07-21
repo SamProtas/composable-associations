@@ -10,7 +10,7 @@ module Data.ComposableAssociation
     ( -- * Description
       -- $header
 
-      -- * Base Types
+      -- * Core Types
       Association (..)
     , (:<>) (..)
     , WithAssociation
@@ -22,7 +22,7 @@ module Data.ComposableAssociation
 
       -- * Lens
     , _value
-    , _keyValue
+    , _assoc
     , _base
 
       -- * Generic Invalid Encoding Exception
@@ -36,15 +36,14 @@ import Data.Typeable
 
 -- | A type representing a key-value association where the "key" itself exists only at the type level.
 --
--- >>> let x = Association Proxy [1, 2, 3] :: Asssociation "type_level_key" [Int]
+-- >>> let x = Association Proxy [1, 2, 3] :: Asssociation "type-level-key" [Int]
 --
 -- This type exists primarily as a way to "tag" data with a key for the purpose of serializing haskell data into
 -- formats that have a key-value representation (ex: a JSON object).
 --
--- The example above represents a serializable key-value pair with a key of "type_level_key" and a value of [1, 2, 3].
+-- The example above represents a serializable key-value pair with a key of @"type-level-key"@ and a value of @[1, 2, 3]@.
 --
--- Because the key itself is represented at the type-level, this single data constructor can easily represent wrapping
--- any haskell value in a key-value association for serialization/deserialization.
+-- Storing the key as type-level information allows for unambiguous deserialization.
 data Association key value = Association (Proxy key) value
                       deriving (Show, Eq, Generic, Functor, Foldable, Traversable)
 
@@ -67,45 +66,45 @@ data Association key value = Association (Proxy key) value
 -- >>> bobAndFriends :: User :<> Association "friends" [User]
 -- >>> let bobAndFriends = bob :<> Association Proxy bobsFriends
 --
--- While @(bob, bobsFriends)@ contains the same values as @bobAndFriends@, it lacks information about how to add
--- @bobsFriends@ to to combine this information into a single serialized key-value object (as well as how to deserialize
--- it).
+-- While @(bob, bobsFriends)@ contains the same values as @bobAndFriends@, it lacks information about how to combine
+-- @bob@ and @bobsFriends@ together into a single serialized key-value object (as well as how to deserialize
+-- that back into haskell values).
 data base :<> assoc = base :<> assoc
                        deriving (Show, Eq, Generic, Functor, Foldable, Traversable)
 
--- | Type alias for the (:<>) type operator
+-- | Type alias for the (:<>) type operator.
 --
--- Useful if you don't like the TypeOperators extension
+-- Useful if you don't like the TypeOperators extension.
 type WithAssociation base assoc = base :<> assoc
 
--- | Function alias for the (:<>) type constructor
+-- | Function alias for the @(:<>)@ type constructor.
 withAssociation :: a -> b -> WithAssociation a b
 withAssociation = (:<>)
 
--- | @_value :: Lens value value' (SetKey key value) (SetKey key value')@
+-- | @_value :: Lens value value' (Association key value) (Association key value')@
 _value :: Functor f => (value -> f value') -> Association key value -> f (Association key value')
 _value inj (Association key value) = Association key <$> inj value
 
--- | @_keyValue :: Lens keyValue keyValue' (base :<> keyValue) (base :<> keyValue')@
-_keyValue :: Functor f => (keyValue -> f keyValue') -> base :<> keyValue -> f (base :<> keyValue')
-_keyValue inj (base :<> keyValue) = (:<>) base <$> inj keyValue
+-- | @_assoc :: Lens assoc assoc' (base :<> assoc) (base :<> assoc')@
+_assoc :: Functor f => (assoc -> f assoc') -> base :<> assoc -> f (base :<> assoc')
+_assoc inj (base :<> keyValue) = (:<>) base <$> inj keyValue
 
--- | @_base :: Lens base base' (base :<> keyValue) (base' :<> keyValue)@
-_base :: Functor f => (base -> f base') -> base :<> keyValue -> f (base' :<> keyValue)
-_base inj (base :<> keyValue) =  flip (:<>) keyValue <$> inj base
+-- | @_base :: Lens base base' (base :<> assoc) (base' :<> assoc)@
+_base :: Functor f => (base -> f base') -> base :<> assoc -> f (base' :<> assoc)
+_base inj (base :<> assoc) =  flip (:<>) assoc <$> inj base
 
 -- | Convenience function for creating associations.
 --
 -- This is especially useful when type-inference elsewhere in your program will determine the type of the Association.
 --
--- >>> let x = asValue True :: Association "whatever_key" Bool
+-- >>> let x = asValue True :: Association "whatever-key" Bool
 asValue :: obj -> Association key obj
 asValue = Association Proxy
 
--- | Convenience function for changing the type of the "key"
+-- | Convenience function for changing the type of the @Association@'s key.
 --
--- >>> let x = Association Proxy 10 :: Association "key_x" Int
--- >>> let y = reKey x :: Association "key_y" Int
+-- >>> let x = Association Proxy 10 :: Association "key-x" Int
+-- >>> let y = reKey x :: Association "key-y" Int
 reKey :: Association key obj -> Association key' obj
 reKey (Association _ obj) = Association Proxy obj
 
@@ -120,8 +119,8 @@ instance Show ObjectEncodingException where
 instance Exception ObjectEncodingException
 
 -- $header
--- This library exports basic types, helper functions, and hand-written Lens's .
+-- This library exports core types, helper functions, and Lens's.
 --
--- Unless you're implementing a serialization format library (orphan instances for these types to implement
--- serialization/deserialization for some format) you probably are in the wrong place. Please see other packages under
--- this namespace for useful typeclass implementations, they should re-export this module.
+-- Unless you're implementing a serialization library (orphan instances for these types to implement
+-- serialization/deserialization for some format) you probably don't want to import this package directly. Additional
+-- packages in this namespace re-export this module along with their orphan instances for serialization.

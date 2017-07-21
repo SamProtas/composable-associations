@@ -10,6 +10,7 @@ module Data.ComposableAssociation.Aeson
     ( -- * Quickstart
       -- $quickstart
 
+      -- * Re-Exported Core Types\/Functions\/Lens
       module Data.ComposableAssociation
 
       -- * Invalid JSON Encoding Exception
@@ -22,7 +23,6 @@ import Data.Proxy
 import Data.Typeable
 import Control.Exception
 
-import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Aeson
 import Data.Aeson.Types
@@ -93,7 +93,7 @@ instance (FromJSON base, FromJSON obj, KnownSymbol key) => FromJSON (base :<> As
 -- >>> decode "{\"age\":25,\"name\":\"Alice\",\"messages\":[102,305,410]}" :: Maybe (ExampleUser :<> Association "messages" [Int])
 -- Just (ExampleUser {name = "Alice", age = 25} :<> Association Proxy [102,305,410]) -- "Proxy" is the value of type "messages"
 --
--- @Association@ @Proxy@ @a@ has a stand-alone encoding/decoding too
+-- @Association Proxy a@ has a stand-alone encoding/decoding too
 --
 -- >>> encode $ Association (Proxy :: Proxy "one-off-key") [1, 2, 3]
 -- "{\"one-off-key\":[1,2,3]}"
@@ -103,12 +103,16 @@ instance (FromJSON base, FromJSON obj, KnownSymbol key) => FromJSON (base :<> As
 --
 -- These are chainable too!
 --
--- >>> encode (alice :<> asValue [1,2,3] :<> asValue [True, False] :: ExampleUser :<> Association "numbers" [Int] :<> Association "bools" [Bool])
+-- >>> manyAssociations :: ExampleUser :<> Association "numbers" [Int] :<> Association "bools" [Bool]
+-- >>> manyAssociations = alice :<> asValue [1,2,3] :<> asValue [True, False]
+-- >>> encode manyAssociations
 -- "{\"age\":25,\"name\":\"Alice\",\"bools\":[true,false],\"numbers\":[1,2,3]}"
 --
 -- You can build JSON objects from just values!
 --
--- >>> encode (asValue True :<> asValue "Hello" :<> asValue alice :: Association "a-bool" Bool :<> Association "a-string" String :<> Association "an-alice" ExampleUser)
+-- >>> allValues :: Association "a-bool" Bool :<> Association "a-string" String :<> Association "an-alice" ExampleUser
+-- >>> allValues = asValue True :<> asValue "Hello" :<> asValue alice
+-- >>> encode allValues
 -- "{\"a-bool\":true,\"an-alice\":{\"age\":25,\"name\":\"Alice\"},\"a-string\":\"Hello\"}"
 --
 -- Decoding fails if you specify a non-existent key (standard Aeson behavior for failed decoding).
@@ -124,9 +128,12 @@ instance (FromJSON base, FromJSON obj, KnownSymbol key) => FromJSON (base :<> As
 -- *** Exception: JsonObjectEncodingException (Array [Number 1.0,Number 2.0,Number 3.0])
 --
 -- GHC Extension Note:
--- You'll need @DataKinds@ for this library (type level literals, no getting around this).
--- You'll probably want @TypeOperators@ as well (although you can use @WithAssociation@ instead of @:<>@ to avoid this).
--- You can avoid @PolyKinds@ if you use @asValue True :: Association "key" Bool@ or type inference instead of
+--
+-- * You'll need @DataKinds@ for this library (type level literals, no getting around this).
+--
+-- * You'll probably want @TypeOperators@ as well (although you can use @WithAssociation@ instead of @:<>@ to avoid this).
+--
+-- * You can avoid @PolyKinds@ if you use @asValue True :: Association "key" Bool@ or type inference instead of
 -- @Association (Proxy :: Proxy "key") True@.
 
 

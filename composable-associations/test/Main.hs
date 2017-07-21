@@ -23,15 +23,15 @@ unitTests = testGroup "Unit Tests"
   , testCase ":<> Getter1" $ withObjTest ^. _base @?= "a"
   , testCase ":<> Modify1" $ (withObjTest & _base %~ (++ "1")) @?= "a1" :<> "b"
   , testCase ":<> Set1" $ (withObjTest & _base .~ True) @?= True :<> "b"
-  , testCase ":<> Getter2" $ withObjTest ^. _keyValue @?= "b"
-  , testCase ":<> Modify2" $ (withObjTest & _keyValue %~ (++ "1")) @?= "a" :<> "b1"
-  , testCase ":<> Set2" $ (withObjTest & _keyValue .~ True) @?= "a" :<> True
+  , testCase ":<> Getter2" $ withObjTest ^. _assoc @?= "b"
+  , testCase ":<> Modify2" $ (withObjTest & _assoc %~ (++ "1")) @?= "a" :<> "b1"
+  , testCase ":<> Set2" $ (withObjTest & _assoc .~ True) @?= "a" :<> True
   , testCase "Assoc :<> Assoc Base-Getter" $ withSetKeyTest ^. _base . _value @?=  "a"
-  , testCase "Assoc :<> Assoc Key-Getter" $ withSetKeyTest ^. _keyValue . _value @?= "b"
+  , testCase "Assoc :<> Assoc Key-Getter" $ withSetKeyTest ^. _assoc . _value @?= "b"
   , testCase "Assoc :<> Assoc Base-Modify" $
       (withSetKeyTest & _base . _value %~ (++ "1")) @?= asValue "a1" :<> asValue "b"
   , testCase "Assoc :<> Assoc Key-Modify" $
-      (withSetKeyTest & _keyValue . _value %~ (++ "1")) @?= asValue "a" :<> asValue "b1" ]
+      (withSetKeyTest & _assoc . _value %~ (++ "1")) @?= asValue "a" :<> asValue "b1" ]
 
 setKeyTest :: Association "test" String
 setKeyTest = asValue "object"

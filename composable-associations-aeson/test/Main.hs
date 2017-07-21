@@ -6,7 +6,6 @@
 module Main where
 
 import GHC.Generics
-import GHC.TypeLits
 import Data.Maybe
 import Data.Either
 
