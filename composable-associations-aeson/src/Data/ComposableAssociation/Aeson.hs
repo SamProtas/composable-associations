@@ -66,6 +66,8 @@ instance (FromJSON base, FromJSON obj, KnownSymbol key) => FromJSON (base :<> As
     where proxy = Proxy :: Proxy key
           key = T.pack $ symbolVal proxy
 
+-- $setup
+-- >>> import GHC.Generics
 
 -- $quickstart
 -- Assume some example data below:
@@ -91,7 +93,9 @@ instance (FromJSON base, FromJSON obj, KnownSymbol key) => FromJSON (base :<> As
 -- Since "messages" is type (not value) information, we can decode as well.
 --
 -- >>> decode "{\"age\":25,\"name\":\"Alice\",\"messages\":[102,305,410]}" :: Maybe (ExampleUser :<> Association "messages" [Int])
--- Just (ExampleUser {name = "Alice", age = 25} :<> Association Proxy [102,305,410]) -- "Proxy" is the value of type "messages"
+-- Just (ExampleUser {name = "Alice", age = 25} :<> Association Proxy [102,305,410])
+--
+-- In the above, "Proxy" is the value of type "messages".
 --
 -- @Association Proxy a@ has a stand-alone encoding/decoding too
 --
@@ -103,16 +107,20 @@ instance (FromJSON base, FromJSON obj, KnownSymbol key) => FromJSON (base :<> As
 --
 -- These are chainable too!
 --
--- >>> manyAssociations :: ExampleUser :<> Association "numbers" [Int] :<> Association "bools" [Bool]
--- >>> manyAssociations = alice :<> asValue [1,2,3] :<> asValue [True, False]
--- >>> encode manyAssociations
+-- >>> :{
+-- let manyAssociations :: ExampleUser :<> Association "numbers" [Int] :<> Association "bools" [Bool]
+--     manyAssociations = alice :<> asValue [1,2,3] :<> asValue [True, False]
+-- in encode manyAssociations
+-- :}
 -- "{\"age\":25,\"name\":\"Alice\",\"bools\":[true,false],\"numbers\":[1,2,3]}"
 --
 -- You can build JSON objects from just values!
 --
--- >>> allValues :: Association "a-bool" Bool :<> Association "a-string" String :<> Association "an-alice" ExampleUser
--- >>> allValues = asValue True :<> asValue "Hello" :<> asValue alice
--- >>> encode allValues
+-- >>> :{
+-- let allValues :: Association "a-bool" Bool :<> Association "a-string" String :<> Association "an-alice" ExampleUser
+--     allValues = asValue True :<> asValue "Hello" :<> asValue alice
+-- in encode allValues
+-- :}
 -- "{\"a-bool\":true,\"an-alice\":{\"age\":25,\"name\":\"Alice\"},\"a-string\":\"Hello\"}"
 --
 -- Decoding fails if you specify a non-existent key (standard Aeson behavior for failed decoding).
@@ -123,9 +131,9 @@ instance (FromJSON base, FromJSON obj, KnownSymbol key) => FromJSON (base :<> As
 -- If you try encoding with a "base" value that is itself not encoded to a JSON object you'll get a runtime exception.
 --
 -- >>> encode $ True :<> (asValue [1,2,3] :: Association "this-ends-poorly" [Int])
--- *** Exception: JsonObjectEncodingException (Bool True)
+-- "*** Exception: JsonObjectEncodingException (Bool True)
 -- >>> encode $ [1,2,3] :<> (asValue "will not work" :: Association "still" String)
--- *** Exception: JsonObjectEncodingException (Array [Number 1.0,Number 2.0,Number 3.0])
+-- "*** Exception: JsonObjectEncodingException (Array [Number 1.0,Number 2.0,Number 3.0])
 --
 -- GHC Extension Note:
 --
