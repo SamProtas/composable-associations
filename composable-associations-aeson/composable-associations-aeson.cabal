@@ -50,4 +50,4 @@ test-suite doctest
 
 source-repository head
   type:     git
-  location: https://github.com/SamProtas/composable-associations-aeson
+  location: https://github.com/SamProtas/composable-associations/tree/master/composable-associations-aeson
