@@ -37,4 +37,4 @@ test-suite tests
 
 source-repository head
   type:     git
-  location: https://github.com/SamProtas/composable-associations
+  location: https://github.com/SamProtas/composable-associations/tree/master/composable-associations
