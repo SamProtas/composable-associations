@@ -68,7 +68,6 @@ instance (FromJSON base, FromJSON obj, KnownSymbol key) => FromJSON (base :<> As
 
 -- $setup
 -- >>> import GHC.Generics
--- >>> import Control.Exception
 
 -- $quickstart
 -- Assume some example data below:
