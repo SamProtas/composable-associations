@@ -68,6 +68,7 @@ instance (FromJSON base, FromJSON obj, KnownSymbol key) => FromJSON (base :<> As
 
 -- $setup
 -- >>> import GHC.Generics
+-- >>> import Control.Exception
 
 -- $quickstart
 -- Assume some example data below:
@@ -132,8 +133,6 @@ instance (FromJSON base, FromJSON obj, KnownSymbol key) => FromJSON (base :<> As
 --
 -- >>> encode $ True :<> (asValue [1,2,3] :: Association "this-ends-poorly" [Int])
 -- "*** Exception: JsonObjectEncodingException (Bool True)
--- >>> encode $ [1,2,3] :<> (asValue "will not work" :: Association "still" String)
--- "*** Exception: JsonObjectEncodingException (Array [Number 1.0,Number 2.0,Number 3.0])
 --
 -- GHC Extension Note:
 --
