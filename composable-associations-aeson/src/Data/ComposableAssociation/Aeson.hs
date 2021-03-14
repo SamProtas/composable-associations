@@ -75,20 +75,22 @@ instance (FromJSON base, FromJSON obj, KnownSymbol key) => FromJSON (base :<> As
 -- >>> data ExampleUser = ExampleUser { name :: String, age :: Int } deriving (Show, Eq, Generic)
 -- >>> instance ToJSON ExampleUser
 -- >>> instance FromJSON ExampleUser
+-- >>> data ExampleUserWithMessages = ExampleUserWithMessages { name :: String, age :: Int, messages :: [Int] } deriving (Show, Eq, Generic)
+-- >>> instance ToJSON ExampleUserWithMessages
+-- >>> instance FromJSON ExampleUserWithMessages
 --
--- >>> let alice = ExampleUser { name = "Alice", age = 25 }
--- >>> encode alice
--- "{\"age\":25,\"name\":\"Alice\"}"
---
+-- >>> let aliceName = "Alice"
+-- >>> let aliceAge = 25
 -- >>> let messageIds = [102, 305, 410]
--- >>> encode messageIds
--- "[102,305,410]"
+-- >>> let alice = ExampleUser aliceName aliceAge
+-- >>> let aliceWithMessages = ExampleUserWithMessages aliceName aliceAge messageIds
 --
--- Let's add those messages to the user JSON object without bothering to define another type.
 --
--- >>> let aliceWithMessages = alice :<> (asValue messageIds :: Association "messages" [Int])
--- >>> encode aliceWithMessages
--- "{\"age\":25,\"name\":\"Alice\",\"messages\":[102,305,410]}"
+-- Let's add those messages to the alice object without requiring our custom "WithMessages" version of the User type.
+--
+-- >>> let adHocAliceWithMessages = alice :<> (asValue messageIds :: Association "messages" [Int])
+-- >>> encode aliceWithMessages == encode adHocAliceWithMessages
+-- True
 --
 -- Since "messages" is type (not value) information, we can decode as well.
 --
@@ -105,23 +107,14 @@ instance (FromJSON base, FromJSON obj, KnownSymbol key) => FromJSON (base :<> As
 -- >>> decode "{\"one-off-key\":[1,2,3]}" :: Maybe (Association "one-off-key" [Int])
 -- Just (Association Proxy [1,2,3])
 --
--- These are chainable too!
---
--- >>> :{
--- let manyAssociations :: ExampleUser :<> Association "numbers" [Int] :<> Association "bools" [Bool]
---     manyAssociations = alice :<> asValue [1,2,3] :<> asValue [True, False]
--- in encode manyAssociations
--- :}
--- "{\"age\":25,\"name\":\"Alice\",\"bools\":[true,false],\"numbers\":[1,2,3]}"
---
 -- You can build JSON objects from just values!
 --
 -- >>> :{
--- let allValues :: Association "a-bool" Bool :<> Association "a-string" String :<> Association "an-alice" ExampleUser
---     allValues = asValue True :<> asValue "Hello" :<> asValue alice
--- in encode allValues
+-- let allValues :: Association "name" String :<> Association "age" Int
+--     allValues = asValue aliceName :<> asValue aliceAge
+-- in encode allValues == encode alice
 -- :}
--- "{\"a-bool\":true,\"an-alice\":{\"age\":25,\"name\":\"Alice\"},\"a-string\":\"Hello\"}"
+-- True
 --
 -- Decoding fails if you specify a non-existent key (standard Aeson behavior for failed decoding).
 --
