@@ -11,6 +11,7 @@ import Data.Either
 
 import Data.Proxy
 import Data.Aeson
+import Data.Aeson.Types
 import Data.ByteString.Lazy
 import Test.Tasty
 import Test.Tasty.QuickCheck
