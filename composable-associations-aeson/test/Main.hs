@@ -11,6 +11,7 @@ import Data.Either
 
 import Data.Proxy
 import Data.Aeson
+import Data.Aeson.Types
 import Data.ByteString.Lazy
 import Test.Tasty
 import Test.Tasty.QuickCheck
@@ -47,7 +48,7 @@ unitTests = testGroup "Unit Tests"
   [ testCase "Association ToJSON Instance" $ encode testUser1FriendsAssoc @?= "{\"message_ids\":[1,2,3]}"
   , testCase "Association FromJSON Instance" $ decode "{\"message_ids\":[1,2,3]}" @?= Just testUser1FriendsAssoc
   , testCase ":<> ToJSON" $
-      encode (testUser1 :<> testUser1FriendsAssoc) @?= "{\"message_ids\":[1,2,3],\"userId\":1,\"name\":\"Sam\"}"
+      encode (testUser1 :<> testUser1FriendsAssoc) @?= encode testUser1WithMessages
   , testCase ":<> FromJSON" $
       decode "{\"message_ids\":[1,2,3],\"userId\":1,\"name\":\"Sam\"}" @?= Just (testUser1 :<> testUser1FriendsAssoc)
   , testCase ":<> Invalid Encoding1" $ do
@@ -60,7 +61,7 @@ unitTests = testGroup "Unit Tests"
   , testCase "Decode Association Null" $ decode "{\"message_ids\":null}" @?= Just testMissingMessages
   , testCase "Decode Association Missing Key" $ decode "{}" @?= Just testMissingMessages
   , testCase "Encode :<> Missing Association" $
-      encode (testUser1 :<> testMissingMessages) @?= "{\"message_ids\":null,\"userId\":1,\"name\":\"Sam\"}"
+      encode (testUser1 :<> testMissingMessages) @?= encode testUser1WithMessages { withmessages_message_ids = Nothing }
   , testCase "Decode :<> Missing Association" $
       decode "{\"message_ids\":null,\"userId\":1,\"name\":\"Sam\"}" @?= Just (testUser1 :<> testMissingMessages)
   , testCase "Decode :<> Missing Association Key" $
@@ -75,8 +76,20 @@ data TestUser = TestUser { userId :: Int
 instance ToJSON TestUser
 instance FromJSON TestUser
 
+data TestUserWithMessages = TestUserWithMessages { withMessages_userId :: Int
+                                                 , withMessages_name :: String 
+                                                 , withmessages_message_ids :: Maybe [Int]}
+                                                 deriving (Show, Eq, Generic)
+instance ToJSON TestUserWithMessages where
+    toJSON = genericToJSON defaultOptions { fieldLabelModifier = Prelude.drop 13 }
+instance FromJSON TestUserWithMessages where
+    parseJSON = genericParseJSON defaultOptions { fieldLabelModifier = Prelude.drop 13 }
+
 testUser1 :: TestUser
 testUser1 = TestUser { userId = 1, name = "Sam" }
+
+testUser1WithMessages :: TestUserWithMessages
+testUser1WithMessages = TestUserWithMessages 1 "Sam" (Just [1, 2, 3])
 
 testUser1FriendsAssoc :: Association "message_ids" [Int]
 testUser1FriendsAssoc = Association Proxy [1, 2, 3]

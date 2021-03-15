@@ -1,5 +1,5 @@
 name:                composable-associations-aeson
-version:             0.1.0.0
+version:             0.1.0.1
 synopsis:            Aeson ToJSON/FromJSON implementation for the types of composable-associations
 description:
     This library provides the orphan instances implementation JSON serialization for the types in
